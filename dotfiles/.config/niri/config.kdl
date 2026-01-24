@@ -1,0 +1,41 @@
+input {
+    keyboard {
+        repeat-delay 300
+        repeat-rate 50
+        xkb {
+            layout "us"
+        }
+    }
+}
+
+output "eDP-1" {
+    scale 1.0
+}
+
+layout {
+    border-width 2
+    gap 8
+}
+
+window-rules {
+    match app-id="alacritty" {
+        open-on-output "eDP-1"
+    }
+}
+
+hotkey-overlay {
+    close-with "Escape"
+}
+
+binds {
+    Mod+Shift+Return { spawn "alacritty"; }
+    Mod+Shift+Q { close-window; }
+    Mod+Shift+E { quit; }
+    Mod+Return { spawn "niri-unstable"; }
+    Mod+Left { focus-column-left; }
+    Mod+Right { focus-column-right; }
+    Mod+Down { focus-window-down; }
+    Mod+Up { focus-window-up; }
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+}

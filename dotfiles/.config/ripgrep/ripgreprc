@@ -1,0 +1,3 @@
+--color "never"
+glob "*.bat" --glob "!*.log" --glob "!tags" --glob "!*.lock"
+follow true

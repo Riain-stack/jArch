@@ -160,12 +160,16 @@ setup_dotfiles() {
     mkdir -p "$USER_HOME/.local/share"
     mkdir -p "$USER_HOME/.cache"
 
-    cp -r "${SCRIPT_DIR}/dotfiles/.config/niri" "$USER_HOME/.config/" || true
-    cp -r "${SCRIPT_DIR}/dotfiles/.config/zsh" "$USER_HOME/.config/" || true
-    cp -r "${SCRIPT_DIR}/dotfiles/.zsh" "$USER_HOME/" || true
+    cp -r "${SCRIPT_DIR}/dotfiles/.config/niri" "$USER_HOME/.config/"
+    cp -r "${SCRIPT_DIR}/dotfiles/.config/zsh" "$USER_HOME/.config/"
+    cp -r "${SCRIPT_DIR}/dotfiles/.config/nvim" "$USER_HOME/.config/"
+    cp -r "${SCRIPT_DIR}/dotfiles/.config/starship.toml" "$USER_HOME/.config/"
+    cp -r "${SCRIPT_DIR}/dotfiles/.config/ripgrep" "$USER_HOME/.config/"
+
+    ln -sf "$USER_HOME/.config/zsh/.zshrc" "$USER_HOME/.zshrc"
 
     chown -R $SUDO_USER:$SUDO_USER "$USER_HOME/.config"
-    chown -R $SUDO_USER:$SUDO_USER "$USER_HOME/.zsh"
+    chown -R $SUDO_USER:$SUDO_USER "$USER_HOME/.zshrc"
 
     if [[ -f /etc/passwd ]]; then
         if ! grep -q "${SUDO_USER}.*zsh" /etc/passwd; then
@@ -192,53 +196,6 @@ export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
 EOF
 
     chown $SUDO_USER:$SUDO_USER "$USER_HOME/.zshenv"
-
-    cat > "$USER_HOME/.config/niri/config.kdl" << 'EOF'
-input {
-    keyboard {
-        repeat-delay 300
-        repeat-rate 50
-        xkb {
-            layout "us"
-        }
-    }
-}
-
-output "eDP-1" {
-    scale 1.0
-}
-
-layout {
-    border-width 2
-    gap 8
-}
-
-window-rules {
-    match app-id="alacritty" {
-        open-on-output "eDP-1"
-    }
-}
-
-hotkey-overlay {
-    close-with "Escape"
-}
-
-binds {
-    Mod+Shift+Return { spawn "alacritty"; }
-    Mod+Shift+Q { close-window; }
-    Mod+Shift+E { quit; }
-    Mod+Return { spawn "niri-unstable"; }
-    Mod+Left { focus-column-left; }
-    Mod+Right { focus-column-right; }
-    Mod+Down { focus-window-down; }
-    Mod+Up { focus-window-up; }
-    Mod+F { maximize-column; }
-    Mod+Shift+F { fullscreen-window; }
-}
-EOF
-
-    mkdir -p "$USER_HOME/.config/niri"
-    chown $SUDO_USER:$SUDO_USER "$USER_HOME/.config/niri/config.kdl"
 }
 
 install_fonts() {
