@@ -247,7 +247,7 @@ main() {
         export SUDO_USER
     fi
 
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE}")" && cd .. && pwd)"
 
     log "Starting Arch Coding Distro installation..."
     log "Target user: $SUDO_USER"
