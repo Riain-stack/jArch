@@ -1,0 +1,79 @@
+add_newline = false
+format = """
+[┌](bold blue)${env_var.SHELL} ${directory}${git_branch}${python}${nodejs${rust}${go${java[golang]}}[│](bold blue) ${time}
+[└─](bold blue) ${jobs}${status}${character}
+"""
+
+[env_var.SHELL]
+style = "bold blue"
+format = "[$env_value]($style) "
+variable = "SHELL"
+default = "zsh"
+
+[directory]
+style = "bold blue"
+format = "[$path]($style)"
+truncation_length = 3
+truncate_to_repo = false
+
+[docker_context]
+style = "blue bold"
+disabled = false
+
+[git_branch]
+style = "bold green"
+symbol = ""
+format = "[$branch]($style) "
+
+[git_status]
+style = "bold yellow"
+format = "[\\[$all_status$ahead_behind\\]]($style) "
+
+[python]
+style = "yellow bold"
+format = "[via $version]($style) "
+symbol = " "
+
+[nodejs]
+style = "green bold"
+format = "[via $version]($style) "
+symbol = ""
+
+[rust]
+style = "red bold"
+format = "[via $version]($style) "
+symbol = ""
+
+[go]
+style = "cyan bold"
+format = "[via $version]($style) "
+symbol = ""
+
+[java]
+style = "red bold"
+format = "[via $version]($style) "
+symbol = ""
+
+[golang]
+style = "cyan bold"
+format = "[via $version]($style) "
+symbol = ""
+
+[time]
+disabled = false
+style = "bold blue"
+format = "[$time]($style) "
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[✗](bold red)"
+
+[status]
+style = "red bold"
+format = "[\\[$status\\]]($style) "
+disabled = false
+
+[jobs]
+style = "bold yellow"
+format = "[$number]($style) "
+symbol = ""
