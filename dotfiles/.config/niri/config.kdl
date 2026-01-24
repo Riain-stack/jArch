@@ -4,6 +4,7 @@ input {
         repeat-rate 50
         xkb {
             layout "us"
+            options "compose:ralt"
         }
     }
 }
@@ -15,6 +16,8 @@ output "eDP-1" {
 layout {
     border-width 2
     gap 8
+    padding-between 8
+    tab-bar height 32
 }
 
 window-rules {
@@ -31,11 +34,34 @@ binds {
     Mod+Shift+Return { spawn "alacritty"; }
     Mod+Shift+Q { close-window; }
     Mod+Shift+E { quit; }
-    Mod+Return { spawn "niri-unstable"; }
+    Mod+Return { spawn "alacritty"; }
+    Mod+Shift+Space { consume-or-exit; }
+    Mod+Space { toggle-window-floating; }
     Mod+Left { focus-column-left; }
     Mod+Right { focus-column-right; }
     Mod+Down { focus-window-down; }
     Mod+Up { focus-window-up; }
+    Mod+Shift+Left { move-column-left; }
+    Mod+Shift+Right { move-column-right; }
+    Mod+Shift+Down { move-window-down; }
+    Mod+Shift+Up { move-window-up; }
+    Mod+Comma { consume-window-into-column; }
+    Mod+Period { expose-window; }
+    Mod+R { column-column-orientation; }
     Mod+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+W { switch-workspace "left"; }
+    Mod+S { switch-workspace "down"; }
+    Mod+A { switch-workspace "up"; }
+    Mod+D { switch-workspace "right"; }
 }
