@@ -134,7 +134,7 @@ install_aur_helper() {
         cd /tmp
         sudo -u $SUDO_USER git clone https://aur.archlinux.org/paru.git
         cd paru
-        sudo -u $SUDO_USER makepkg -si --noconfirm
+        sudo -u $SUDO_USER makepkg -si --noconfirm --noextract
         cd -
         rm -rf /tmp/paru
     fi
@@ -163,7 +163,7 @@ setup_dotfiles() {
     cp -r "${SCRIPT_DIR}/dotfiles/.config/niri" "$USER_HOME/.config/"
     cp -r "${SCRIPT_DIR}/dotfiles/.config/zsh" "$USER_HOME/.config/"
     cp -r "${SCRIPT_DIR}/dotfiles/.config/nvim" "$USER_HOME/.config/"
-    cp -r "${SCRIPT_DIR}/dotfiles/.config/starship.toml" "$USER_HOME/.config/"
+    cp "${SCRIPT_DIR}/dotfiles/.config/starship.toml" "$USER_HOME/.config/"
     cp -r "${SCRIPT_DIR}/dotfiles/.config/ripgrep" "$USER_HOME/.config/"
 
     ln -sf "$USER_HOME/.config/zsh/.zshrc" "$USER_HOME/.zshrc"

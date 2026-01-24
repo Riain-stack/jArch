@@ -1,5 +1,5 @@
 vim.cmd([[set runtimepath=$VIMRUNTIME]])
-vim.opt.packpath = { '/home/fool/.local/share/nvim/site' }
+vim.opt.packpath = { vim.fn.stdpath('data') .. '/site' }
 
 vim.o.shiftwidth = 4
 vim.o.tabstop = 4
@@ -52,6 +52,7 @@ require('lazy').setup({
     'tpope/vim-surround',
     'windwp/nvim-autopairs',
     'numToStr/Comment.nvim',
+    'stevearc/conform.nvim',
 })
 
 vim.cmd('colorscheme kanagawa')
@@ -96,13 +97,24 @@ vim.keymap.set('n', '<Space>', '', {})
 vim.g.mapleader = ' '
 
 vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>')
-vim.keymap.set('n', '<leader>f', '<cmd>lua vim.lsp.buf.formatting()<CR>')
+vim.keymap.set('n', '<leader>f', '<cmd>lua vim.lsp.buf.format({ async = true })<CR>')
 vim.keymap.set('n', '<leader>q', ':q<CR>')
 vim.keymap.set('n', '<leader>w', ':w<CR>')
 vim.keymap.set('n', '<leader>o', 'o<Esc>')
 vim.keymap.set('n', '<leader>O', 'O<Esc>')
 vim.keymap.set('n', '<leader>p', '"+p')
 vim.keymap.set('v', '<leader>y', '"+y')
+
+require('conform').setup({
+    formatters_by_ft = {
+        lua = { 'stylua' },
+        python = { 'black' },
+        javascript = { 'prettier' },
+        typescript = { 'prettier' },
+        rust = { 'rustfmt' },
+        go = { 'gofmt' },
+    },
+})
 
 vim.api.nvim_create_autocmd('BufWritePre', {
     pattern = '*',

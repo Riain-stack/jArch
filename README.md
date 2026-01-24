@@ -20,8 +20,8 @@ Arch-based distro for coding with SDDM, Niri, Zsh, Neovim and automatic installe
 ## Installation
 
 ```bash
-chmod +x install.sh
-sudo ./install.sh
+chmod +x install/install.sh
+sudo ./install/install.sh
 ```
 
 The installer will:

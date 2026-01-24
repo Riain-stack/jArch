@@ -42,8 +42,10 @@ alias d='docker'
 
 alias c='clear'
 
-if command -v tmux &> /dev/null; then
-    [[ -z "$TMUX" && -z "$SSH_CONNECTION" ]] && tmux new-session -A -s main
+if command -v tmux &> /dev/null && [[ -z "$SSH_CONNECTION" ]]; then
+    [[ -z "$TMUX" ]] && tmux new-session -A -s main
+fi
+
 end() {
     builtin exit
 }
