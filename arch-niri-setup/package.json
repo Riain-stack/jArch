@@ -1,0 +1,14 @@
+{
+    "name": "arch-niri-setup",
+    "version": "1.0.0",
+    "description": "Arch-based distro with niri, sddm and development environment",
+    "main": "install/install.sh",
+    "scripts": {
+        "install": "bash install/install.sh",
+        "build": "docker build -t arch-niri .",
+        "test": "docker run --rm -it arch-niri"
+    },
+    "keywords": ["arch", "niri", "sddm", "wayland", "neovim"],
+    "author": "",
+    "license": "MIT"
+}

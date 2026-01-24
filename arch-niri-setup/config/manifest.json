@@ -1,0 +1,41 @@
+{
+    "app": "io.github.archniri",
+    "runtime": "org.freedesktop.Platform",
+    "runtime-version": "23.08",
+    "sdk": "org.freedesktop.Sdk",
+    "base": "org.freedesktop.Platform",
+    "base-version": "23.08",
+    "command": "install.sh",
+    "finish-args": [
+        "--share=network",
+        "--filesystem=host",
+        "--filesystem=/",
+        "--device=all",
+        "--allow=devel"
+    ],
+    "modules": [
+        {
+            "name": "arch-niri-setup",
+            "buildsystem": "simple",
+            "build-commands": [
+                "mkdir -p /app/bin",
+                "cp install.sh /app/bin/",
+                "chmod +x /app/bin/install.sh",
+                "mkdir -p /app/config",
+                "cp -r .config/dotfiles /app/config/",
+                "cp -r .config/sddm /app/config/",
+                "cp -r .config/niri /app/config/",
+                "cp -r .config/waybar /app/config/",
+                "cp -r .config/fish /app/config/",
+                "cp -r config /app/config/"
+            ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "file://.",
+                    "sha256": "ignore"
+                }
+            ]
+        }
+    ]
+}
