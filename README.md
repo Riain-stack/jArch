@@ -24,6 +24,9 @@ Arch-based distro for coding with SDDM, Niri, Zsh, Neovim and automatic installe
 - **Modern Tools**: ripgrep, fd, fzf, bat, exa, dust, tmux, lazygit
 - **Fonts**: Meslo, JetBrains Mono, Fira Mono, Noto
 - **Apps**: Alacritty, Firefox, Thunar, VS Code
+- **Security**: UFW firewall, fail2ban, SSH server
+- **Sound**: PipeWire audio support
+- **Wayland Tools**: waybar, rofi, grim, slurp, wl-clipboard
 
 ## Requirements
 
@@ -40,19 +43,23 @@ sudo ./install/install.sh
 ```
 
 The installer will:
-1. Update system packages
-2. Install display server, SDDM, Niri
-3. Install shell (Zsh) with plugins
-4. Install development languages and tools
-5. Install Neovim with plugins
-6. Set up dotfiles for Niri, Zsh, Neovim, Starship
-7. Install fonts and additional tools
-8. Configure Docker
+1. Check system compatibility (Arch, network, disk space)
+2. Update system packages
+3. Install display server, SDDM, Niri
+4. Install shell (Zsh) with plugins
+5. Install development languages and tools
+6. Install Neovim with plugins
+7. Install Wayland tools and security packages
+8. Set up dotfiles for Niri, Zsh, Neovim, Starship
+9. Install fonts and additional tools
+10. Configure Docker, firewall, and sound
+11. Backup existing configurations
 
 Post-installation:
 - Reboot to launch SDDM
 - Login with your user account
 - Neovim and starship will configure on first launch
+- Configurations backed up before overwrite
 
 ### Manual Installation Steps
 
@@ -285,6 +292,31 @@ echo $WAYLAND_DISPLAY
 
 # Verify dependencies
 pacman -Qs wayland xwayland
+```
+
+### Firewall issues
+
+```bash
+# Check firewall status
+sudo ufw status verbose
+
+# Manage firewall rules
+sudo ufw allow <port>
+sudo ufw reject <port>
+
+# Disable temporarily
+sudo ufw disable
+```
+
+### Sound issues
+
+```bash
+# Check PipeWire status
+pactl info
+wpctl status
+
+# Restart PipeWire
+systemctl --user restart pipewire pipewire-pulse
 ```
 
 ## Contributing
