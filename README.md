@@ -7,59 +7,133 @@ Arch-based distro for coding with SDDM, Niri, Zsh, Neovim and automatic installe
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Screenshots](#screenshots)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
 - [Customization](#customization)
 - [Included Dotfiles](#included-dotfiles)
 - [Development Stack](#development-stack)
+- [FAQ](#faq)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
+- [Changelog](#changelog)
 - [License](#license)
 
 ## Features
 
-- **Display**: SDDM + Niri Wayland compositor
-- **Shell**: Zsh with starship prompt and plugins (fast-syntax-highlighting, autosuggestions, vi-mode)
-- **Editor**: Neovim with lazy.nvim, LSP, treesitter, Kanagawa theme
-- **Dev Tools**: Python, Node.js, Rust, Go, Java, GCC/Clang, Docker
-- **Modern Tools**: ripgrep, fd, fzf, bat, exa, dust, tmux, lazygit
-- **Fonts**: Meslo, JetBrains Mono, Fira Mono, Noto
-- **Apps**: Alacritty, Firefox, Thunar, VS Code
-- **Security**: UFW firewall, fail2ban, SSH server
-- **Sound**: PipeWire audio support
-- **Wayland Tools**: waybar, rofi, grim, slurp, wl-clipboard
+### Core Components
+| Component | Tool | Details |
+|-----------|------|---------|
+| **Display Manager** | SDDM | Simple, fast login manager |
+| **Compositor** | Niri | Modern Wayland compositor (Rust-based) |
+| **Shell** | Zsh | Starship prompt, autosuggestions, vi-mode |
+| **Terminal** | Alacritty | GPU-accelerated terminal emulator |
+| **Editor** | Neovim | LSP, treesitter, lazy.nvim, Kanagawa theme |
+
+### Development Environment
+| Category | Packages Included |
+|----------|------------------|
+| **Languages** | Python (pip, pipx, poetry), Node.js (npm, pnpm, yarn), Rust (cargo), Go, Java (JDK, Maven, Gradle) |
+| **Build Tools** | gcc, clang, cmake, make, ninja, valgrind, gdb, lldb |
+| **Version Control** | git, git-lfs, git-delta, lazygit |
+| **Containers** | Docker, docker-compose |
+| **Testing** | pytest (via Python), jasmine (via Node) |
+| **Documentation** | man, batcat, batman, tldr |
+
+### Modern CLI Tools
+- **Search**: ripgrep (fast grep), fd (fast find)
+- **Viewing**: bat (syntax-highlighted cat), exa (enhanced ls)
+- **System**: btop/htop, dust (du alternative), neofetch
+- **Fuzzy**: fzf (fuzzy finder), rofi (app launcher)
+- **Shell**: tmux, zsh plugins (autosuggestions, syntax highlighting)
+
+### Desktop Apps
+- Firefox (web browser), Discord, Thunar (file manager)
+- VS Code, Gedit, Obsidian
+- MPV (media), mpv/image viewer
+
+### System Features
+- **Security**: UFW firewall, fail2ban, openssh
+- **Sound**: PipeWire audio stack
+- **Wayland**: waybar, wl-clipboard, screenshot tools
+
+### Performance
+- Wayland compositor (no X11 overhead)
+- Rust-based Niri (fast and efficient)
+- Lazy load Neovim plugins
+- Optimized shell configuration
 
 ## Requirements
 
 - Arch Linux or Arch-based distro
 - Sudo access
 - ~10GB free space (~4GB after installation)
-- Internet connection for packages
+- Internet connection for packages (~500MB download)
+- 512MB RAM minimum (2GB+ recommended)
 
 ## Installation
 
+### Quick Install
+
 ```bash
-chmod +x install/install.sh
+git clone https://github.com/fools-stack/jArch.git
+cd jArch
 sudo ./install/install.sh
 ```
 
-The installer will:
-1. Check system compatibility (Arch, network, disk space)
-2. Update system packages
-3. Install display server, SDDM, Niri
-4. Install shell (Zsh) with plugins
-5. Install development languages and tools
-6. Install Neovim with plugins
-7. Install Wayland tools and security packages
-8. Set up dotfiles for Niri, Zsh, Neovim, Starship
-9. Install fonts and additional tools
-10. Configure Docker, firewall, and sound
-11. Backup existing configurations
+### Installation Options
 
-Post-installation:
-- Reboot to launch SDDM
-- Login with your user account
-- Neovim and starship will configure on first launch
-- Configurations backed up before overwrite
+```bash
+# With verbose output
+sudo ./install/install.sh
+
+# Installation log saved to /var/log/arch-coding-install-<timestamp>.log
+```
+
+### What Gets Installed
+
+| Phase | Action |
+|-------|--------|
+| 1. Pre-checks | Verify Arch, network connectivity, disk space |
+| 2. Base System | Update packages, install base tools |
+| 3. Display | Xorg, drivers, Niri, SDDM |
+| 4. Shell | Zsh, starship, plugins |
+| 5. Development | Languages, build tools, git |
+| 6. Editor | Neovim with plugins |
+| 7. AUR | paru helper, starship, zsh plugins |
+| 8. Extras | Fonts, apps, Wayland tools |
+| 9. Security | UFW, fail2ban, openssh |
+| 10. Configs | Backup and copy dotfiles |
+| 11. Services | Docker, firewall, sound |
+
+### Post-Installation
+
+1. **Reboot** your system
+2. **SDDM** will start automatically
+3. **Login** with your user account
+4. First launch will configure:
+   - Neovim plugins (lazy.nvim)
+   - Starship prompt
+   - Zsh completions
+5. Old configs backed up to home directory
+
+### Installation Time
+
+| Phase | Time |
+|-------|------|
+| Pre-checks | ~10s |
+| Package downloads | ~5 min |
+| Installation | ~15 min |
+| Configuration | ~2 min |
+| **Total** | **~20-25 min** |
+
+## Screenshots
+
+> **Note**: Screenshots will be added here showing:
+> - Niri Wayland compositor layout
+> - Starship prompt with git branch
+> - Neovim with Kanagawa theme
+> - Waybar status bar
+> - Terminal with syntax highlighting
 
 ### Manual Installation Steps
 
@@ -195,29 +269,59 @@ https://starship.rs/config/
 
 ### Languages Installed
 
-| Language | Version/Package Manager |
-|----------|------------------------|
-| Python | pip, pipx, poetry, virtualenv |
-| Node.js | npm, pnpm, yarn |
-| Rust | cargo |
-| Go | go |
-| Java | jdk-openjdk, Maven, Gradle, SBT |
+| Language | Package Managers | Tools |
+|----------|-----------------|-------|
+| **Python** | pip, pipx, poetry, virtualenv | pytest, black, mypy |
+| **Node.js** | npm, pnpm, yarn | eslint, prettier, vitest |
+| **Rust** | cargo | clippy, rustfmt, cargo-watch |
+| **Go** | go modules | golangci-lint, gofmt |
+| **Java** | Maven, Gradle, SBT | jdk-openjdk |
 
 ### Development Tools
 
 - **Version Control**: Git, git-lfs, git-delta, lazygit
 - **Containers**: Docker, docker-compose
-- **Terminal/Shell**: tmux, zsh, starship
-- **Build CMake, ninja, make, gcc, clang, valgrind
-- **Utilities**: jq, yq, httpie, curl, wget
+- **Terminals**: tmux (session management), zsh (shell)
+- **Build Tools**: CMake, ninja, make, gcc, clang, valgrind
+- **Utilities**: jq (JSON), yq (YAML), httpie (HTTP), curl, wget
 
-### LSP Servers Configured
+### LSP Servers (Neovim)
 
- pyls, tsserver, rust-analyzer, gopls, jdtls, bashls, jsonls, yamlls, eslint, tailwindcss
+pyl, tsserver, rust-analyzer, gopls, jdtls, bashls, jsonls, yamlls, eslint, tailwindcss
 
-### Neovim Plugins
+### Neovim Plugin Stack
 
-lazy, treesitter, nvim-cmp, lualine, nvim-tree, gitsigns, conform.nvim
+- `lazy` - Plugin manager
+- `treesitter` - Syntax highlighting
+- `nvim-cmp` - Auto-completion
+- `lualine` - Status line
+- `nvim-tree` - File explorer
+- `gitsigns` - Git diff in gutter
+- `conform.nvim` - Code formatting
+
+## FAQ
+
+### Can I run this on a different Linux distro?
+
+This is Arch-specific. For other distros, you'll need manual installation.
+
+### Will this delete my current desktop?
+
+No. If you already have a desktop, Niri will be available as an option. You can switch between them.
+
+### Can I keep my existing dotfiles?
+
+The installer backs up existing configs to `$HOME/.config-backup-<date>.tar.gz` before overwriting.
+
+### What if my GPU isn't AMD/Intel?
+
+The installer installs drivers for AMD, Intel, and NVIDIA. Check Arch wiki for NVIDIA specifics.
+
+### Can I uninstall?
+
+Yes. Remove dotfiles, uninstall packages, restore backups, and reinstall your previous DE.
+
+## Troubleshooting
 
 ## Troubleshooting
 
@@ -344,9 +448,38 @@ sudo ./install/install.sh
 
 ### Style Guidelines
 
-- Bash scripts: Use 4-space indentation, `set -e` for error handling
-- Neovim Lua: Follow Lua best practices, use lazy loading
-- Config files: Keep configurations DRY and modular
+- **Bash**: 4-space indentation, `set -eo pipefail`, error handling with trap
+- **Neovim Lua**: Follow best practices, use lazy loading
+- **Configs**: DRY and modular
+
+## Changelog
+
+### Version 1.0.0 (2024-01-24)
+
+#### Added
+- Initial Arch Coding Distro
+- SDDM display manager
+- Niri Wayland compositor
+- Zsh with starship prompt plugins
+- Neovim with lazy.nvim, LSP, treesitter
+- Development languages (Python, Node.js, Rust, Go, Java)
+- Security tools (UFW, fail2ban, openssh)
+- PipeWire sound
+- Wayland tools (waybar, rofi, grim, slurp)
+- Automatic installer with error handling
+- Configuration backups
+
+#### Features
+- Pre-install checks (network, disk space, Arch detection)
+- Progress indicators
+- Installation logging
+- Keyboard shortcuts table
+- Comprehensive README
+
+#### Documentation
+- README with troubleshooting guide
+- FAQ section
+- Customization instructions
 
 ## License
 
