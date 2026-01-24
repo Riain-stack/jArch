@@ -1,1 +1,10 @@
-{ config_file_path = "$HOME/.config/niri/config" }
+--color "always"
+--line-number
+--hidden
+--follow
+--smart-case
+--max-columns 200
+!*.log
+!node_modules
+!.git
+!.cache
