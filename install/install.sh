@@ -11,6 +11,18 @@ log() { echo -e "${GREEN}[INFO]${NC} $1"; }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
+progress() { echo -ne "\r${BLUE}[PROGRESS]${NC} $1..."; }
+done_msg() { echo -e "\r${GREEN}[DONE]${NC}    $1... OK"; }
+
+skip_if_installed() {
+    local pkg=$1
+    if command -v "$pkg" &> /dev/null; then
+        warn "$pkg already installed, skipping"
+        return 1
+    fi
+    return 0
+}
+
 check_arch() {
     if [[ ! -f /etc/arch-release ]]; then
         error "This script must be run on Arch Linux or Arch-based distro"
@@ -63,15 +75,17 @@ install_base() {
 
 install_display() {
     log "Installing display server and drivers..."
-    pacman -S --noconfirm --needed xorg-server xorg-xwayland
-    pacman -S --noconfirm --needed xf86-video-amdgpu xf86-video-intel xf86-video-nouveau
-    pacman -S --noconfirm --needed libgl libglvnd mesa vulkan-tools
+    pacman -S --noconfirm --needed xorg-server xorg-xwayland xf86-video-amdgpu xf86-video-intel xf86-video-nouveau libgl libglvnd mesa vulkan-tools
 }
 
 install_sddm() {
     log "Installing SDDM..."
-    pacman -S --noconfirm --needed sddm
-    systemctl enable sddm.service || true
+    if pacman -Q sddm &> /dev/null; then
+        warn "SDDM already installed"
+    else
+        pacman -S --noconfirm --needed sddm
+        systemctl enable sddm.service || true
+    fi
 }
 
 install_niri() {
@@ -88,73 +102,21 @@ install_dev_tools() {
     log "Installing development tools..."
 
     pacman -S --noconfirm --needed \
-        git \
-        git-lfs \
-        git-delta \
-        lazygit \
-        make \
-        cmake \
-        ninja \
-        gcc \
-        clang \
-        llvm \
-        gdb \
-        lldb \
-        valgrind \
-        docker \
-        docker-compose \
-        python \
-        python-pip \
-        python-pipx \
-        python-poetry \
-        python-virtualenv \
-        nodejs \
-        npm \
-        pnpm \
-        yarn \
-        rust \
-        cargo \
-        go \
-        jdk-openjdk \
-        maven \
-        gradle \
-        sbt \
-        swig \
-        patch \
-        diffutils \
-        patchutils \
-        automake \
-        autoconf \
-        libtool \
-        pkgconf \
-        bison \
-        flex \
-        gperf \
-        intltool \
-        which \
-        unzip \
-        zip \
-        p7zip \
-        jq \
-        yq \
-        httpie \
-        curl \
-        wget \
-        rsync \
-        cpio \
-        tar \
-        gzip \
-        xz \
-        bzip2 \
-        lz4 \
-        zstd
+        git git-lfs git-delta lazygit \
+        make cmake ninja gcc clang llvm gdb lldb valgrind \
+        docker docker-compose \
+        python python-pip python-pipx python-poetry python-virtualenv \
+        nodejs npm pnpm yarn \
+        rust cargo go \
+        jdk-openjdk maven gradle sbt \
+        swig patch diffutils patchutils automake autoconf libtool pkgconf bison flex gperf intltool which \
+        unzip zip p7zip jq yq httpie curl wget rsync cpio tar gzip xz bzip2 lz4 zstd
 }
 
 install_neovim() {
     log "Installing Neovim..."
     pacman -S --noconfirm --needed neovim ripgrep fd unzip
 
-    log "Installing Neovim plugins..."
     if command -v nvim &> /dev/null; then
         su - $SUDO_USER -c "nvim --headless '+Lazy! sync' +qa" 2>/dev/null || true
     fi
@@ -162,25 +124,22 @@ install_neovim() {
 
 install_aur_helper() {
     log "Installing paru AUR helper..."
-    if ! command -v paru &> /dev/null; then
-        cd /tmp
-        sudo -u $SUDO_USER git clone https://aur.archlinux.org/paru.git
-        cd paru
-        sudo -u $SUDO_USER makepkg -si --noconfirm --noextract
-        cd -
-        rm -rf /tmp/paru
-    fi
+    command -v paru &> /dev/null && { warn "paru already installed"; return; }
+
+    cd /tmp
+    sudo -u $SUDO_USER git clone https://aur.archlinux.org/paru.git
+    cd paru
+    sudo -u $SUDO_USER makepkg -si --noconfirm --noextract
+    cd -
+    rm -rf /tmp/paru
 }
 
 install_aur_packages() {
     log "Installing AUR packages..."
-    if command -v paru &> /dev/null; then
+    command -v paru &> /dev/null && \
         sudo -u $SUDO_USER paru -S --noconfirm \
-            starship \
-            zsh-fast-syntax-highlighting \
-            zsh-autosuggestions \
-            zsh-vi-mode
-    fi
+            starship zsh-fast-syntax-highlighting zsh-autosuggestions zsh-vi-mode \
+        || warn "paru not available, skipping AUR packages"
 }
 
 setup_dotfiles() {
@@ -188,25 +147,15 @@ setup_dotfiles() {
     local USER_HOME
     USER_HOME=$(eval echo ~$SUDO_USER)
 
-    mkdir -p "$USER_HOME/.config"
-    mkdir -p "$USER_HOME/.local/share"
-    mkdir -p "$USER_HOME/.cache"
+    mkdir -p "$USER_HOME/.config" "$USER_HOME/.local/share" "$USER_HOME/.cache"
 
-    cp -r "${SCRIPT_DIR}/dotfiles/.config/niri" "$USER_HOME/.config/"
-    cp -r "${SCRIPT_DIR}/dotfiles/.config/zsh" "$USER_HOME/.config/"
-    cp -r "${SCRIPT_DIR}/dotfiles/.config/nvim" "$USER_HOME/.config/"
-    cp "${SCRIPT_DIR}/dotfiles/.config/starship.toml" "$USER_HOME/.config/"
-    cp -r "${SCRIPT_DIR}/dotfiles/.config/ripgrep" "$USER_HOME/.config/"
-
+    cp -r "${SCRIPT_DIR}/dotfiles/.config/"* "$USER_HOME/.config/"
     ln -sf "$USER_HOME/.config/zsh/.zshrc" "$USER_HOME/.zshrc"
 
-    chown -R $SUDO_USER:$SUDO_USER "$USER_HOME/.config"
-    chown -R $SUDO_USER:$SUDO_USER "$USER_HOME/.zshrc"
+    chown -R $SUDO_USER:$SUDO_USER "$USER_HOME/.config" "$USER_HOME/.zshrc"
 
-    if [[ -f /etc/passwd ]]; then
-        if ! grep -q "${SUDO_USER}.*zsh" /etc/passwd; then
-            chsh -s /bin/zsh $SUDO_USER || warn "Failed to set default shell to zsh"
-        fi
+    if ! grep -q "${SUDO_USER}.*zsh" /etc/passwd; then
+        chsh -s /bin/zsh $SUDO_USER || warn "Failed to set default shell to zsh"
     fi
 }
 
@@ -233,36 +182,16 @@ EOF
 install_fonts() {
     log "Installing fonts..."
     pacman -S --noconfirm --needed \
-        ttf-meslo \
-        ttf-jetbrains-mono \
-        ttf-fira-mono \
-        ttf-dejavu \
-        noto-fonts \
-        noto-fonts-cjk \
-        noto-fonts-emoji
+        ttf-meslo ttf-jetbrains-mono ttf-fira-mono ttf-dejavu \
+        noto-fonts noto-fonts-cjk noto-fonts-emoji
 }
 
 install_additional_tools() {
     log "Installing additional coding tools..."
     pacman -S --noconfirm --needed \
-        alacritty \
-        firefox \
-        discord \
-        obsidian \
-        code \
-        gedit \
-        evince \
-        file-roller \
-        thunar \
-        gvfs \
-        gvfs-mtp \
-        gvfs-smb \
-        tumbler \
-        ffmpeg \
-        imagemagick \
-        mpv \
-        zathura \
-        zathura-pdf-mupdf
+        alacritty firefox discord obsidian code gedit evince \
+        file-roller thunar gvfs gvfs-mtp gvfs-smb tumbler \
+        ffmpeg imagemagick mpv zathura zathura-pdf-mupdf
 }
 
 setup_docker() {
