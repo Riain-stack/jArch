@@ -67,10 +67,10 @@ Edit these files:
 ## Included Dotfiles
 
 - `dotfiles/.config/niri/config.kdl` - Niri WM config
-- `dotfiles/.config/zsh/zshrc` - Zsh shell config
+- `dotfiles/.config/zsh/.zshrc` - Zsh shell config
 - `dotfiles/.config/nvim/init.lua` - Neovim config
 - `dotfiles/.config/starship.toml` - Starship prompt config
-- `dotfiles/.zsh/zshrc` - Zsh plugins and aliases
+- `dotfiles/.config/ripgrep/ripgreprc` - Ripgrep config
 
 ## Development Stack
 
