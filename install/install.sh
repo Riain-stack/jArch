@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -eo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -7,12 +7,16 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log() { echo -e "${GREEN}[INFO]${NC} $1"; }
-warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
+LOG_FILE="/var/log/arch-coding-install-$(date +%Y%m%d-%H%M%S).log"
 
-progress() { echo -ne "\r${BLUE}[PROGRESS]${NC} $1..."; }
-done_msg() { echo -e "\r${GREEN}[DONE]${NC}    $1... OK"; }
+log() { echo -e "${GREEN}[INFO]${NC} $1" | tee -a "$LOG_FILE"; }
+warn() { echo -e "${YELLOW}[WARN]${NC} $1" | tee -a "$LOG_FILE"; }
+error() { echo -e "${RED}[ERROR]${NC} $1" | tee -a "$LOG_FILE"; exit 1; }
+
+progress() { echo -ne "\r${BLUE}[PROGRESS]${NC} $1..." | tee -a "$LOG_FILE"; }
+done_msg() { echo -e "\r${GREEN}[DONE]${NC}    $1... OK" | tee -a "$LOG_FILE"; }
+
+fail_msg() { echo -e "\r${RED}[FAIL]${NC}    $1... FAILED" | tee -a "$LOG_FILE"; }
 
 skip_if_installed() {
     local pkg=$1
@@ -22,6 +26,16 @@ skip_if_installed() {
     fi
     return 0
 }
+
+handle_error() {
+    local exit_code=$?
+    local line_no=$1
+    error "Script failed at line $line_no with exit code $exit_code"
+    error "Log file: $LOG_FILE"
+    exit $exit_code
+}
+
+trap 'handle_error ${LINENO}' ERR
 
 check_arch() {
     if [[ ! -f /etc/arch-release ]]; then
@@ -70,12 +84,20 @@ backup_configs() {
 
 install_base() {
     log "Installing base packages..."
-    pacman -Syu --noconfirm --needed base base-devel networkmanager sudo
+    progress "Installing base packages"
+    if ! pacman -Syu --noconfirm --needed base base-devel networkmanager sudo > /dev/null 2>&1; then
+        fail_msg "Installing base packages"
+        warn "System update failed, retrying..."
+        pacman -Syu --noconfirm --needed base base-devel networkmanager sudo || error "Failed to install base packages"
+    fi
+    done_msg "Installing base packages"
 }
 
 install_display() {
     log "Installing display server and drivers..."
-    pacman -S --noconfirm --needed xorg-server xorg-xwayland xf86-video-amdgpu xf86-video-intel xf86-video-nouveau libgl libglvnd mesa vulkan-tools
+    progress "Installing display server"
+    pacman -S --noconfirm --needed xorg-server xorg-xwayland xf86-video-amdgpu xf86-video-intel xf86-video-nouveau libgl libglvnd mesa vulkan-tools > /dev/null 2>&1
+    done_msg "Installing display server"
 }
 
 install_sddm() {
@@ -95,11 +117,14 @@ install_niri() {
 
 install_shell_tools() {
     log "Installing shell tools..."
-    pacman -S --noconfirm --needed zsh zsh-completions fzf ripgrep bat exa fd dust tmux htop btop neofetch
+    progress "Installing shell tools"
+    pacman -S --noconfirm --needed zsh zsh-completions fzf ripgrep bat exa fd dust tmux htop btop neofetch > /dev/null 2>&1
+    done_msg "Installing shell tools"
 }
 
 install_dev_tools() {
     log "Installing development tools..."
+    progress "Installing development tools"
 
     pacman -S --noconfirm --needed \
         git git-lfs git-delta lazygit \
@@ -110,7 +135,9 @@ install_dev_tools() {
         rust cargo go \
         jdk-openjdk maven gradle sbt \
         swig patch diffutils patchutils automake autoconf libtool pkgconf bison flex gperf intltool which \
-        unzip zip p7zip jq yq httpie curl wget rsync cpio tar gzip xz bzip2 lz4 zstd
+        unzip zip p7zip jq yq httpie curl wget rsync cpio tar gzip xz bzip2 lz4 zstd > /dev/null 2>&1
+
+    done_msg "Installing development tools"
 }
 
 install_neovim() {
@@ -126,20 +153,26 @@ install_aur_helper() {
     log "Installing paru AUR helper..."
     command -v paru &> /dev/null && { warn "paru already installed"; return; }
 
-    cd /tmp
-    sudo -u $SUDO_USER git clone https://aur.archlinux.org/paru.git
-    cd paru
-    sudo -u $SUDO_USER makepkg -si --noconfirm --noextract
-    cd -
+    progress "Installing paru"
+    cd /tmp || error "Cannot access /tmp"
     rm -rf /tmp/paru
+    sudo -u $SUDO_USER git clone https://aur.archlinux.org/paru.git || error "Failed to clone paru"
+    cd paru || error "Failed to enter paru directory"
+    sudo -u $SUDO_USER makepkg -si --noconfirm --noextract > /dev/null 2>&1 || warn "Paru installation failed"
+    cd - || true
+    rm -rf /tmp/paru
+    done_msg "Installing paru"
 }
 
 install_aur_packages() {
     log "Installing AUR packages..."
-    command -v paru &> /dev/null && \
-        sudo -u $SUDO_USER paru -S --noconfirm \
-            starship zsh-fast-syntax-highlighting zsh-autosuggestions zsh-vi-mode \
-        || warn "paru not available, skipping AUR packages"
+    command -v paru &> /dev/null || { warn "paru not available, skipping AUR packages"; return; }
+
+    progress "Installing AUR packages"
+    sudo -u $SUDO_USER paru -S --noconfirm \
+        starship zsh-fast-syntax-highlighting zsh-autosuggestions zsh-vi-mode > /dev/null 2>&1 \
+        || warn "AUR package installation failed"
+    done_msg "Installing AUR packages"
 }
 
 setup_dotfiles() {
@@ -181,17 +214,21 @@ EOF
 
 install_fonts() {
     log "Installing fonts..."
+    progress "Installing fonts"
     pacman -S --noconfirm --needed \
         ttf-meslo ttf-jetbrains-mono ttf-fira-mono ttf-dejavu \
-        noto-fonts noto-fonts-cjk noto-fonts-emoji
+        noto-fonts noto-fonts-cjk noto-fonts-emoji > /dev/null 2>&1
+    done_msg "Installing fonts"
 }
 
 install_additional_tools() {
     log "Installing additional coding tools..."
+    progress "Installing additional tools"
     pacman -S --noconfirm --needed \
         alacritty firefox discord obsidian code gedit evince \
         file-roller thunar gvfs gvfs-mtp gvfs-smb tumbler \
-        ffmpeg imagemagick mpv zathura zathura-pdf-mupdf
+        ffmpeg imagemagick mpv zathura zathura-pdf-mupdf > /dev/null 2>&1
+    done_msg "Installing additional tools"
 }
 
 setup_docker() {
@@ -282,16 +319,30 @@ main() {
     log "Key features installed:"
     log "  - Niri Wayland compositor"
     log "  - SDDM display manager"
-    log "  - Zsh with plugins"
-    log "  - Neovim with lazy.nvim"
+    log "  - Zsh with starship, autosuggestions, syntax highlighting, vi-mode"
+    log "  - Neovim with lazy.nvim, LSP, treesitter, Kanagawa theme"
     log "  - Development tools (Python, Node.js, Rust, Go, Java)"
-    log "  - Git, Docker, tmux"
-    log "  - Modern tools (ripgrep, fd, fzf, bat, exa)"
+    log "  - Git, Docker, tmux, lazygit"
+    log "  - Modern tools (ripgrep, fd, fzf, bat, exa, dust, btop)"
+    log "  - Security (UFW, fail2ban, openssh)"
+    log "  - Sound (PipeWire)"
+    log "  - Wayland tools (waybar, rofi, grim, slurp, wl-clipboard)"
     log ""
-    log "To customize further, edit:"
-    log "  - ~/.config/niri/config.kdl"
-    log "  - ~/.config/starship.toml"
-    log "  - ~/.zshrc"
+    log "Configurations:"
+    log "  - ~/.config/niri/config.kdl  - Window manager"
+    log "  - ~/.config/starship.toml     - Prompt theme"
+    log "  - ~/.config/zsh/.zshrc        - Shell config"
+    log "  - ~/.config/nvim/init.lua     - Neovim config"
+    log "  - ~/.zshenv                    - Environment"
+    log ""
+    log "Installation log saved to: $LOG_FILE"
+    log ""
+    log "Keyboard shortcuts (Niri - Mod = Super/Win):"
+    log "  Mod+Shift+Return - Terminal"
+    log "  Mod+Shift+E       - Exit Niri"
+    log "  Mod+1-5           - Switch workspaces"
+    log "  Mod+F             - Maximize"
+    log "  Mod+Shift+F       - Fullscreen"
 }
 
 main "$@"
