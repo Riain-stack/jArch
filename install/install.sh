@@ -24,6 +24,38 @@ check_sudo() {
     fi
 }
 
+check_network() {
+    log "Checking network connectivity..."
+    if ! ping -c 1 archlinux.org &> /dev/null; then
+        error "No internet connection. Please check your network."
+    fi
+    log "Network connectivity OK"
+}
+
+check_disk_space() {
+    log "Checking disk space..."
+    local space_kb=$(df -k / | tail -1 | awk '{print $4}')
+    local space_mb=$((space_kb / 1024))
+    local required_mb=10240
+
+    if [[ $space_mb -lt $required_mb ]]; then
+        error "Insufficient disk space. Need at least ${required_mb}MB free, found ${space_mb}MB"
+    fi
+    log "Disk space OK (${space_mb}MB free)"
+}
+
+backup_configs() {
+    log "Backing up existing configurations..."
+    local USER_HOME
+    USER_HOME=$(eval echo ~$SUDO_USER)
+
+    [[ -d "$USER_HOME/.config" ]] && tar -czf "$USER_HOME/.config-backup-$(date +%Y%m%d).tar.gz" "$USER_HOME/.config" 2>/dev/null
+    [[ -f "$USER_HOME/.zshrc" ]] && cp "$USER_HOME/.zshrc" "$USER_HOME/.zshrc-backup-$(date +%Y%m%d)" 2>/dev/null
+    [[ -f "$USER_HOME/.zshenv" ]] && cp "$USER_HOME/.zshenv" "$USER_HOME/.zshenv-backup-$(date +%Y%m%d)" 2>/dev/null
+
+    log "Configurations backed up to $USER_HOME"
+}
+
 install_base() {
     log "Installing base packages..."
     pacman -Syu --noconfirm --needed base base-devel networkmanager sudo
@@ -239,6 +271,36 @@ setup_docker() {
         usermod -aG docker $SUDO_USER
         log "Added $SUDO_USER to docker group (requires logout)"
     fi
+
+    if ! systemctl is-active docker &> /dev/null; then
+        systemctl enable docker.service || true
+        systemctl start docker.service || warn "Docker service failed to start"
+    fi
+}
+
+install_wayland_tools() {
+    log "Installing Wayland tools..."
+    pacman -S --noconfirm --needed waybar rofi grim slurp wl-clipboard
+}
+
+install_security_tools() {
+    log "Installing security tools..."
+    pacman -S --noconfirm --needed ufw fail2ban openssh
+}
+
+setup_firewall() {
+    log "Setting up firewall..."
+
+    if command -v ufw &> /dev/null; then
+        ufw --force enable
+        ufw allow SSH
+        log "UFW firewall enabled with SSH allowed"
+    fi
+}
+
+install_sound() {
+    log "Installing sound support..."
+    pacman -S --noconfirm --needed pipewire pipewire-pulse wireplumber
 }
 
 main() {
@@ -253,6 +315,8 @@ main() {
     log "Target user: $SUDO_USER"
 
     check_arch
+    check_network
+    check_disk_space
 
     log "Updating system..."
     pacman -Syu --noconfirm || warn "System update failed, continuing..."
@@ -269,6 +333,11 @@ main() {
     install_aur_packages
     install_fonts
     install_additional_tools
+    install_wayland_tools
+    install_security_tools
+    setup_firewall
+    install_sound
+    backup_configs
     setup_dotfiles
     create_user_configs
     setup_docker
