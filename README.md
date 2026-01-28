@@ -1,6 +1,22 @@
-# Arch Coding Distro
+# jArch - Arch Coding Distro
 
-Arch-based distro for coding with SDDM, Niri, Zsh, Neovim and automatic installer.
+[![License](https://img.shields.io/github/license/Riain-stack/jArch?style=flat-square)](LICENSE)
+[![Arch Linux](https://img.shields.io/badge/Arch-Linux-1793D1?style=flat-square&logo=arch-linux&logoColor=white)](https://archlinux.org/)
+[![Niri](https://img.shields.io/badge/Niri-Wayland-blue?style=flat-square)](https://github.com/YaLTeR/niri)
+[![Neovim](https://img.shields.io/badge/Neovim-LSP-green?style=flat-square&logo=neovim)](https://neovim.io/)
+
+> 🚀 A modern, developer-focused Arch Linux distribution with automated setup
+
+Complete Arch-based distro for coding featuring SDDM, Niri Wayland compositor, Zsh, Neovim, and a fully automated installer. Get a production-ready development environment in minutes!
+
+## ✨ Highlights
+
+- ⚡ **One-command installation** - Automated setup from scratch
+- 🎨 **Modern Wayland compositor** - Niri with smooth animations
+- 💻 **Full dev stack** - Python, Node.js, Rust, Go, Java, Docker
+- 🛠️ **Pre-configured tools** - Neovim, Zsh, Alacritty, and more
+- 📦 **60+ packages** - Carefully selected for development
+- 🔒 **Security hardened** - Best practices built-in
 
 ## Table of Contents
 
@@ -481,14 +497,34 @@ sudo ./install/install.sh
 - FAQ section
 - Customization instructions
 
-## License
+## 📄 License
 
-MIT License - feel free to use, modify, and distribute this distro.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Resources
+Feel free to use, modify, and distribute this distro!
 
-- [Niri Documentation](https://github.com/YaLTeR/niri)
-- [Starship Prompt](https://starship.rs/)
-- [Neovim Config Guide](https://nvim-lua.readthedocs.io/)
-- [Arch Wiki](https://wiki.archlinux.org/)
-- [Wayland Information](https://wayland.freedesktop.org/)
+## 📚 Resources
+
+- [Niri Documentation](https://github.com/YaLTeR/niri) - Wayland compositor
+- [Starship Prompt](https://starship.rs/) - Cross-shell prompt
+- [Neovim Config Guide](https://nvim-lua.readthedocs.io/) - Lua configuration
+- [Arch Wiki](https://wiki.archlinux.org/) - Comprehensive Arch documentation
+- [Wayland Information](https://wayland.freedesktop.org/) - Display protocol
+
+## 🙋 Support
+
+For issues or questions:
+- **Bug reports**: [Open an issue](https://github.com/Riain-stack/jArch/issues)
+- **Feature requests**: [Open an issue](https://github.com/Riain-stack/jArch/issues)
+- **Documentation**: See [CHANGELOG.md](CHANGELOG.md)
+
+---
+
+<div align="center">
+
+**Made with ❤️ for Arch Linux developers**
+
+[![GitHub](https://img.shields.io/badge/GitHub-Riain--stack-181717?style=flat-square&logo=github)](https://github.com/Riain-stack)
+[![Arch Linux](https://img.shields.io/badge/Built%20for-Arch%20Linux-1793D1?style=flat-square)](https://archlinux.org/)
+
+</div>

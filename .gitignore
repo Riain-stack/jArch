@@ -1,0 +1,73 @@
+# Build artifacts
+*.o
+*.so
+*.a
+*.dylib
+*.dll
+*.exe
+*.out
+build/
+dist/
+target/
+
+# Logs
+*.log
+logs/
+*.swp
+*.swo
+*.swn
+
+# OS files
+.DS_Store
+Thumbs.db
+.directory
+
+# Editor/IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.code-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+.env
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Rust
+Cargo.lock
+target/
+
+# Installation artifacts
+*.iso
+*.img
+archiso/
+
+# SSH keys and secrets
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+*.ppk
+.ssh/
+
+# System files
+.cache/
+cache/
+*.cache
