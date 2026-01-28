@@ -63,7 +63,8 @@ require('nvim-treesitter.configs').setup({
     indent = { enable = true },
 })
 
-require('nvim-lspconfig').setup({
+require('mason').setup()
+require('mason-lspconfig').setup({
     ensure_installed = { 'lua_ls', 'pyright', 'tsserver', 'rust_analyzer', 'gopls', 'jdtls', 'bashls', 'jsonls', 'yamlls', 'eslint', 'tailwindcss' },
     handlers = {
         function(server_name)

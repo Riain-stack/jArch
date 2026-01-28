@@ -1,6 +1,6 @@
 add_newline = false
 format = """
-[┌](bold blue)${env_var.SHELL} ${directory}${git_branch}${python}${nodejs${rust}${go${java[golang]}}[│](bold blue) ${time}
+[┌](bold blue)${env_var.SHELL} ${directory}${git_branch}${python}${nodejs}${rust}${go}${java}[│](bold blue) ${time}
 [└─](bold blue) ${jobs}${status}${character}
 """
 

@@ -5,7 +5,7 @@ HISTSIZE=10000
 SAVEHIST=10000
 
 setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE EXTENDED_HISTORY SHARE_HISTORY INC_APPEND_HISTORY PROMPT_SUBST
-setopt AUTO_CD CORRECT CORRECT_ALL NOMATCH
+setopt AUTO_CD CORRECT NOMATCH
 setopt COMPLETE_ALIUSES GLOB_COMPLETE
 
 fpath+=($HOME/.config/zsh/completions)
@@ -66,7 +66,7 @@ if command -v pyenv &> /dev/null; then
     eval "$(pyenv init -)"
 fi
 
-if command -v rust cargo clippy &> /dev/null; then
+if command -v cargo &> /dev/null; then
     export PATH="$HOME/.cargo/bin:$PATH"
 fi
 

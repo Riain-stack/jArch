@@ -1,10 +1,10 @@
---color "always"
+--color=always
 --line-number
 --hidden
 --follow
 --smart-case
---max-columns 200
-!*.log
-!node_modules
-!.git
-!.cache
+--max-columns=200
+--glob=!*.log
+--glob=!node_modules/
+--glob=!.git/
+--glob=!.cache/

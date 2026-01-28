@@ -9,9 +9,9 @@ input {
     }
 }
 
-output "eDP-1" {
-    scale 1.0
-}
+// Configure your output(s) here
+// Example: output "eDP-1" { scale 1.0 }
+// Use 'niri msg outputs' to list available outputs
 
 layout {
     border-width 2
@@ -35,6 +35,7 @@ binds {
     Mod+Shift+Q { close-window; }
     Mod+Shift+E { quit; }
     Mod+Return { spawn "alacritty"; }
+    Mod+D { spawn "rofi" "-show" "drun"; }
     Mod+Shift+Space { consume-or-exit; }
     Mod+Space { toggle-window-floating; }
     Mod+Left { focus-column-left; }
@@ -60,8 +61,6 @@ binds {
     Mod+Shift+3 { move-column-to-workspace 3; }
     Mod+Shift+4 { move-column-to-workspace 4; }
     Mod+Shift+5 { move-column-to-workspace 5; }
-    Mod+W { switch-workspace "left"; }
-    Mod+S { switch-workspace "down"; }
-    Mod+A { switch-workspace "up"; }
-    Mod+D { switch-workspace "right"; }
+    Print { spawn "grim" "-g" "$(slurp)" "~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"; }
+    Mod+Print { spawn "grim" "~/Pictures/screenshot-$(date +%Y%m%d-%H%M%S).png"; }
 }

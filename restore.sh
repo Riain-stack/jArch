@@ -56,43 +56,51 @@ restore_dotfiles() {
         return 1
     fi
     
-    cd "${BACKUP_DIR}/dotfiles"
-    
-    # Shell configs
-    if [ -d "shell" ]; then
-        print_info "Restoring shell configs..."
-        [ -f "shell/.zshrc" ] && cp shell/.zshrc "$HOME/" && print_info "  ✓ .zshrc"
-        [ -f "shell/.bashrc" ] && cp shell/.bashrc "$HOME/" && print_info "  ✓ .bashrc"
+    # Restore .config directory structure
+    if [ -d "${BACKUP_DIR}/dotfiles/.config" ]; then
+        print_info "Restoring .config directory..."
+        mkdir -p "$HOME/.config"
+        
+        # Zsh
+        if [ -d "${BACKUP_DIR}/dotfiles/.config/zsh" ]; then
+            mkdir -p "$HOME/.config/zsh"
+            cp -r "${BACKUP_DIR}/dotfiles/.config/zsh/"* "$HOME/.config/zsh/"
+            ln -sf "$HOME/.config/zsh/.zshrc" "$HOME/.zshrc"
+            print_info "  ✓ Zsh"
+        fi
+        
+        # Neovim
+        if [ -d "${BACKUP_DIR}/dotfiles/.config/nvim" ]; then
+            mkdir -p "$HOME/.config/nvim"
+            cp -r "${BACKUP_DIR}/dotfiles/.config/nvim/"* "$HOME/.config/nvim/"
+            print_info "  ✓ Neovim"
+        fi
+        
+        # Starship
+        if [ -f "${BACKUP_DIR}/dotfiles/.config/starship.toml" ]; then
+            cp "${BACKUP_DIR}/dotfiles/.config/starship.toml" "$HOME/.config/"
+            print_info "  ✓ Starship"
+        fi
+        
+        # Ripgrep
+        if [ -d "${BACKUP_DIR}/dotfiles/.config/ripgrep" ]; then
+            mkdir -p "$HOME/.config/ripgrep"
+            cp -r "${BACKUP_DIR}/dotfiles/.config/ripgrep/"* "$HOME/.config/ripgrep/"
+            print_info "  ✓ Ripgrep"
+        fi
+        
+        # Niri (handled separately in restore_niri)
     fi
     
-    # Terminal
-    if [ -d "terminal" ]; then
-        print_info "Restoring terminal configs..."
-        [ -d "terminal/alacritty" ] && mkdir -p "$HOME/.config/alacritty" && cp -r terminal/alacritty/* "$HOME/.config/alacritty/" && print_info "  ✓ Alacritty"
-    fi
-    
-    # Editor
-    if [ -d "editor" ]; then
-        print_info "Restoring editor configs..."
-        [ -d "editor/nvim" ] && mkdir -p "$HOME/.config/nvim" && cp -r editor/nvim/* "$HOME/.config/nvim/" && print_info "  ✓ Neovim"
-    fi
-    
-    # Git
-    if [ -d "git" ]; then
-        print_info "Restoring git config..."
-        [ -f "git/.gitconfig" ] && cp git/.gitconfig "$HOME/" && print_info "  ✓ Git"
-    fi
-    
-    cd "${BACKUP_DIR}"
     print_success "Dotfiles restored!"
 }
 
 restore_niri() {
     print_step "Restoring Niri configuration..."
     
-    if [ -d "${BACKUP_DIR}/dotfiles/niri" ]; then
+    if [ -d "${BACKUP_DIR}/dotfiles/.config/niri" ]; then
         mkdir -p "$HOME/.config/niri"
-        cp -r "${BACKUP_DIR}/dotfiles/niri/"* "$HOME/.config/niri/"
+        cp -r "${BACKUP_DIR}/dotfiles/.config/niri/"* "$HOME/.config/niri/"
         print_success "Niri restored!"
     else
         print_warning "Niri config not found"
