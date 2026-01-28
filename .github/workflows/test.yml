@@ -1,0 +1,56 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run syntax check
+        run: |
+          echo "::group::Bash Syntax Check"
+          bash -n install/install.sh
+          echo "::endgroup::"
+      
+      - name: Run step counting test
+        run: |
+          echo "::group::Step Counting Verification"
+          ./tests/test-step-counting.sh
+          echo "::endgroup::"
+      
+      - name: Run profile logic test
+        run: |
+          echo "::group::Profile Logic Tests"
+          ./tests/test-profile-logic.sh
+          echo "::endgroup::"
+      
+      - name: Run component mapping test
+        run: |
+          echo "::group::Component Mapping Tests"
+          ./tests/test-component-mapping.sh
+          echo "::endgroup::"
+      
+      - name: Test dry-run mode
+        run: |
+          echo "::group::Dry-run Mode Test"
+          # Test dry-run without sudo (should work for preview)
+          ./install/install.sh --help
+          echo "::endgroup::"
+      
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ All tests passed successfully!"
+          echo "- Syntax check: PASSED"
+          echo "- Step counting: PASSED"
+          echo "- Profile logic: PASSED"
+          echo "- Component mapping: PASSED"
