@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-28
+
+### Added
+- **Backup & Restore System**: Complete configuration management
+  - `backup.sh` - Automated backup with git integration
+  - `restore.sh` - Safe restoration with automatic backups
+  - Archive creation for easy distribution
+  - Git commit and push automation
+  - Status reporting and backup tracking
+- Safety features for restore operations:
+  - Automatic backup before restore
+  - Confirmation prompts
+  - Timestamped safety backups in `~/.jarch-backups/`
+
+### Changed
+- Enhanced README with Backup & Restore section
+- Added Quick Start guide
+- Updated repository URL from fools-stack to Riain-stack
+- Improved documentation structure
+
 ## [1.0.0] - 2026-01-28
 
 ### Added
@@ -51,9 +71,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ISO build automation
 - Additional window manager options
 - More theme choices
-- Backup and restore utilities
 - Auto-update mechanism
+- Scheduled backups
 
 ---
 
+[1.1.0]: https://github.com/Riain-stack/jArch/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Riain-stack/jArch/releases/tag/v1.0.0

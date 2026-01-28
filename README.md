@@ -17,10 +17,29 @@ Complete Arch-based distro for coding featuring SDDM, Niri Wayland compositor, Z
 - 🛠️ **Pre-configured tools** - Neovim, Zsh, Alacritty, and more
 - 📦 **60+ packages** - Carefully selected for development
 - 🔒 **Security hardened** - Best practices built-in
+- 💾 **Built-in backup/restore** - Automated configuration management
+
+## 🚀 Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/Riain-stack/jArch.git
+cd jArch
+
+# Install jArch
+sudo ./install/install.sh
+
+# Backup your configuration
+./backup.sh --full
+
+# Restore when needed
+./restore.sh --full
+```
 
 ## Table of Contents
 
 - [Features](#features)
+- [Backup & Restore](#backup--restore)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Screenshots](#screenshots)
@@ -78,6 +97,48 @@ Complete Arch-based distro for coding featuring SDDM, Niri Wayland compositor, Z
 - Lazy load Neovim plugins
 - Optimized shell configuration
 
+## 💾 Backup & Restore
+
+jArch includes built-in backup and restore scripts for configuration management.
+
+### Backup Your Configuration
+
+```bash
+# Full backup (create archive + commit + push to git)
+./backup.sh --full
+
+# Create archive only
+./backup.sh --archive
+
+# Commit and push changes
+./backup.sh --commit
+
+# Show repository status
+./backup.sh --status
+```
+
+### Restore Configuration
+
+```bash
+# Full restore (dotfiles + Niri + all configs)
+./restore.sh --full
+
+# Restore dotfiles only
+./restore.sh --dotfiles
+
+# Restore Niri configuration only
+./restore.sh --niri
+
+# Run jArch installer
+./restore.sh --install
+```
+
+**Safety Features:**
+- 🔒 Automatic backup before restore
+- 📁 Backups saved to `~/.jarch-backups/restore_backup_TIMESTAMP/`
+- ✅ Confirmation prompts before changes
+- 📊 Compressed archives for easy distribution
+
 ## Requirements
 
 - Arch Linux or Arch-based distro
@@ -91,7 +152,7 @@ Complete Arch-based distro for coding featuring SDDM, Niri Wayland compositor, Z
 ### Quick Install
 
 ```bash
-git clone https://github.com/fools-stack/jArch.git
+git clone https://github.com/Riain-stack/jArch.git
 cd jArch
 sudo ./install/install.sh
 ```
