@@ -55,7 +55,13 @@ done_msg() {
     fi
 }
 
-fail_msg() { echo -e "\r${RED}[FAIL]${NC}    $1... FAILED" | tee -a "$LOG_FILE"; }
+fail_msg() { 
+    local msg="${RED}[FAIL]${NC}    $1... FAILED"
+    echo -e "\r$msg"
+    if [[ -w "$LOG_FILE" ]] 2>/dev/null; then
+        echo "$msg" >> "$LOG_FILE" 2>/dev/null
+    fi
+}
 
 show_help() {
     cat << EOF
@@ -184,7 +190,7 @@ check_disk_space() {
 backup_configs() {
     log "Backing up existing configurations..."
     local USER_HOME
-    USER_HOME=$(eval echo ~$SUDO_USER)
+    USER_HOME=$(eval echo ~"$SUDO_USER")
 
     [[ -d "$USER_HOME/.config" ]] && tar -czf "$USER_HOME/.config-backup-$(date +%Y%m%d).tar.gz" "$USER_HOME/.config" 2>/dev/null
     [[ -f "$USER_HOME/.zshrc" ]] && cp "$USER_HOME/.zshrc" "$USER_HOME/.zshrc-backup-$(date +%Y%m%d)" 2>/dev/null
@@ -313,7 +319,7 @@ install_neovim() {
     retry_command "pacman -S --noconfirm --needed neovim ripgrep fd unzip" || error "Failed to install Neovim"
 
     if command -v nvim &> /dev/null; then
-        su - $SUDO_USER -c "nvim --headless '+Lazy! sync' +qa" 2>/dev/null || true
+        su - "$SUDO_USER" -c "nvim --headless '+Lazy! sync' +qa" 2>/dev/null || true
     fi
     done_msg "Installing Neovim"
 }
@@ -337,14 +343,20 @@ install_aur_helper() {
     
     command -v paru &> /dev/null && { warn "paru already installed"; return; }
 
+    local original_dir="$PWD"
     cd /tmp || error "Cannot access /tmp"
     rm -rf /tmp/paru
-    sudo -u $SUDO_USER git clone https://aur.archlinux.org/paru.git || error "Failed to clone paru"
-    cd paru || error "Failed to enter paru directory"
-    sudo -u $SUDO_USER makepkg -si --noconfirm > /dev/null 2>&1 || warn "Paru installation failed"
-    cd - || true
-    rm -rf /tmp/paru
-    done_msg "Installing paru"
+    
+    if sudo -u "$SUDO_USER" git clone https://aur.archlinux.org/paru.git; then
+        cd paru || error "Failed to enter paru directory"
+        sudo -u "$SUDO_USER" makepkg -si --noconfirm > /dev/null 2>&1 || warn "Paru installation failed"
+        cd "$original_dir" || true
+        rm -rf /tmp/paru
+        done_msg "Installing paru"
+    else
+        cd "$original_dir" || true
+        error "Failed to clone paru"
+    fi
 }
 
 install_aur_packages() {
@@ -360,7 +372,7 @@ install_aur_packages() {
     command -v paru &> /dev/null || { warn "paru not available, skipping AUR packages"; return; }
 
     progress "Installing AUR packages"
-    sudo -u $SUDO_USER paru -S --noconfirm \
+    sudo -u "$SUDO_USER" paru -S --noconfirm \
         starship zsh-fast-syntax-highlighting zsh-autosuggestions zsh-vi-mode > /dev/null 2>&1 \
         || warn "AUR package installation failed"
     done_msg "Installing AUR packages"
@@ -369,7 +381,7 @@ install_aur_packages() {
 setup_dotfiles() {
     log "Setting up dotfiles..."
     local USER_HOME
-    USER_HOME=$(eval echo ~$SUDO_USER)
+    USER_HOME=$(eval echo ~"$SUDO_USER")
 
     if [[ "$DRY_RUN" == true ]]; then
         dry_run_msg "cp -r dotfiles/.config/* $USER_HOME/.config/ && chsh -s /bin/zsh"
@@ -381,17 +393,17 @@ setup_dotfiles() {
     cp -r "${SCRIPT_DIR}/dotfiles/.config/"* "$USER_HOME/.config/"
     ln -sf "$USER_HOME/.config/zsh/.zshrc" "$USER_HOME/.zshrc"
 
-    chown -R $SUDO_USER:$SUDO_USER "$USER_HOME/.config" "$USER_HOME/.zshrc"
+    chown -R "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.config" "$USER_HOME/.zshrc"
 
     if ! grep -q "${SUDO_USER}.*zsh" /etc/passwd; then
-        chsh -s /bin/zsh $SUDO_USER || warn "Failed to set default shell to zsh"
+        chsh -s /bin/zsh "$SUDO_USER" || warn "Failed to set default shell to zsh"
     fi
 }
 
 create_user_configs() {
     log "Creating user configurations..."
     local USER_HOME
-    USER_HOME=$(eval echo ~$SUDO_USER)
+    USER_HOME=$(eval echo ~"$SUDO_USER")
 
     if [[ "$DRY_RUN" == true ]]; then
         dry_run_msg "Create $USER_HOME/.zshenv with environment variables"
@@ -410,7 +422,7 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
 EOF
 
-    chown $SUDO_USER:$SUDO_USER "$USER_HOME/.zshenv"
+    chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.zshenv"
 }
 
 verify_installation() {
@@ -525,8 +537,8 @@ setup_docker() {
         return 0
     fi
     
-    if ! groups $SUDO_USER | grep -q docker; then
-        usermod -aG docker $SUDO_USER
+    if ! groups "$SUDO_USER" | grep -q docker; then
+        usermod -aG docker "$SUDO_USER"
         log "Added $SUDO_USER to docker group (requires logout)"
     fi
 
@@ -630,6 +642,11 @@ parse_args() {
 
 calculate_steps() {
     # Only functions that call progress() are counted
+    # Functions with progress(): install_base, install_display, install_niri, 
+    # install_shell_tools, install_dev_tools, install_neovim, install_aur_helper,
+    # install_aur_packages, install_fonts, install_additional_tools, 
+    # install_wayland_tools, install_security_tools, install_sound
+    
     # Minimal: base, display, niri, shell, neovim, fonts, wayland
     # Standard adds: dev_tools, paru, aur_packages, security, sound
     # Full adds: additional_tools

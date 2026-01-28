@@ -16,19 +16,16 @@ echo -e "${CYAN}╚════════════════════�
 echo ""
 
 # Based on installer's calculate_steps() function
-STEPS_MINIMAL=12
-STEPS_STANDARD=16
-STEPS_FULL=20
+# Only count functions that call progress()
+STEPS_MINIMAL=7   # base, display, niri, shell, neovim, fonts, wayland
+STEPS_STANDARD=12 # minimal(7) + dev_tools, paru, aur_packages, security, sound
+STEPS_FULL=13     # standard(12) + additional_tools
 
-# Installation function sequence from main()
+# Installation functions that call progress() from main()
+# These are the only ones that increment the progress counter
 declare -a install_sequence=(
-    "check_arch"
-    "check_network"
-    "check_disk_space"
-    "check_sudo"
     "install_base"
     "install_display"
-    "install_sddm"
     "install_niri"
     "install_shell_tools"
     "install_dev_tools"
@@ -39,20 +36,14 @@ declare -a install_sequence=(
     "install_additional_tools"
     "install_wayland_tools"
     "install_security_tools"
-    "setup_firewall"
     "install_sound"
-    "backup_configs"
-    "setup_dotfiles"
-    "create_user_configs"
-    "setup_docker"
-    "verify_installation"
 )
 
 # Map functions to components (for filtering by profile)
+# Only includes functions that call progress()
 declare -A function_to_component=(
     ["install_base"]="base"
     ["install_display"]="display"
-    ["install_sddm"]="sddm"
     ["install_niri"]="niri"
     ["install_shell_tools"]="shell"
     ["install_dev_tools"]="dev_basic"
@@ -63,34 +54,27 @@ declare -A function_to_component=(
     ["install_additional_tools"]="extras"
     ["install_wayland_tools"]="wayland"
     ["install_security_tools"]="security"
-    ["setup_firewall"]="security"
     ["install_sound"]="sound"
-    ["setup_docker"]="docker"
 )
 
 should_run_in_profile() {
     local func=$1
     local profile=$2
     
-    # Always run non-install functions (checks, backups, etc.)
-    if [[ ! "$func" =~ ^(install_|setup_) ]]; then
-        return 0
-    fi
-    
     # Get component for this function
     local component="${function_to_component[$func]}"
     if [[ -z "$component" ]]; then
-        # No component mapping = always run (like backup_configs, etc.)
-        return 0
+        # No component mapping = shouldn't happen
+        return 1
     fi
     
     # Check if component should be installed in this profile
     case "$profile" in
         minimal)
-            [[ "$component" =~ ^(base|display|sddm|niri|shell|neovim|fonts|wayland)$ ]]
+            [[ "$component" =~ ^(base|display|niri|shell|neovim|fonts|wayland)$ ]]
             ;;
         standard)
-            [[ "$component" =~ ^(base|display|sddm|niri|shell|neovim|fonts|wayland|dev_basic|docker|aur|security|sound)$ ]]
+            [[ "$component" =~ ^(base|display|niri|shell|neovim|fonts|wayland|dev_basic|aur|security|sound)$ ]]
             ;;
         full)
             return 0
@@ -119,15 +103,15 @@ test_profile_steps() {
     echo "Expected steps from calculate_steps(): $expected"
     
     local actual=$(count_steps_for_profile "$profile")
-    echo "Actual steps from function sequence: $actual"
+    echo "Actual progress() calls that will execute: $actual"
     
     echo ""
-    echo "Functions that will run:"
+    echo "Functions with progress() that will run:"
     local step=1
     for func in "${install_sequence[@]}"; do
         if should_run_in_profile "$func" "$profile"; then
-            local component="${function_to_component[$func]:-always}"
-            printf "  %2d. %-30s [%s]\n" "$step" "$func" "$component"
+            local component="${function_to_component[$func]}"
+            printf "  %2d. %-35s [%s]\n" "$step" "$func" "$component"
             step=$((step + 1))
         fi
     done
