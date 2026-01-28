@@ -26,8 +26,14 @@ Complete Arch-based distro for coding featuring SDDM, Niri Wayland compositor, Z
 git clone https://github.com/Riain-stack/jArch.git
 cd jArch
 
+# Preview installation (dry-run)
+sudo ./install/install.sh --dry-run
+
 # Install jArch
 sudo ./install/install.sh
+
+# Resume if interrupted
+sudo ./install/install.sh --resume
 
 # Backup your configuration
 ./backup.sh --full
@@ -54,6 +60,15 @@ sudo ./install/install.sh
 - [License](#license)
 
 ## Features
+
+### Installer Features
+- ⚡ **Progress tracking** - Real-time percentage completion
+- 🔄 **Resume capability** - Continue from where installation failed
+- 🔍 **Dry-run mode** - Preview installation without changes
+- 🎯 **Selective installation** - Skip components you don't need
+- 📋 **Detailed logging** - Full installation logs for troubleshooting
+- 💡 **Smart error messages** - Actionable suggestions when things fail
+- ✅ **Pre-flight checks** - Verify system requirements before starting
 
 ### Core Components
 | Component | Tool | Details |
@@ -160,11 +175,36 @@ sudo ./install/install.sh
 ### Installation Options
 
 ```bash
-# With verbose output
+# Standard installation
 sudo ./install/install.sh
 
-# Installation log saved to /var/log/arch-coding-install-<timestamp>.log
+# Preview without making changes
+sudo ./install/install.sh --dry-run
+
+# Resume interrupted installation
+sudo ./install/install.sh --resume
+
+# Skip specific components
+sudo ./install/install.sh --skip-aur --skip-docker
+
+# Verbose output
+sudo ./install/install.sh --verbose
+
+# Get help
+sudo ./install/install.sh --help
 ```
+
+**Available flags:**
+- `--dry-run` - Preview installation without making changes
+- `--resume` - Resume from previous interrupted installation
+- `--skip-aur` - Skip AUR helper and AUR packages
+- `--skip-docker` - Skip Docker installation
+- `--skip-fonts` - Skip fonts installation
+- `--skip-gui` - Skip GUI applications (Firefox, Discord, etc.)
+- `--verbose` - Show detailed output from package installations
+- `-h, --help` - Display help message
+
+Installation logs are saved to `/var/log/arch-coding-install-<timestamp>.log`
 
 ### What Gets Installed
 

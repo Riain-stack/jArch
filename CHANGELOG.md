@@ -65,6 +65,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dotfiles directory structure
 - Installation script paths
 
+## [1.2.0] - 2026-01-28
+
+### Added
+- **Enhanced Installer System**:
+  - `--dry-run` mode to preview installation without making changes
+  - `--resume` functionality to continue interrupted installations
+  - State tracking system for reliable recovery
+  - Progress percentage tracking (shows X% completion)
+  - Command-line flags: `--skip-aur`, `--skip-docker`, `--skip-fonts`, `--skip-gui`
+  - `--verbose` flag for detailed package installation output
+  - `--help` flag with comprehensive usage information
+- **Improved Error Handling**:
+  - Actionable error messages with troubleshooting suggestions
+  - Better network connectivity error messages
+  - Disk space error messages with cleanup suggestions
+  - Package installation failure recovery suggestions
+- **Better User Experience**:
+  - Colored ASCII art banner on startup
+  - Real-time progress indicators with percentages
+  - Dry-run summary showing what would be installed
+  - Installation summary with conditional feature listing
+  - State file cleanup on successful completion
+
+### Changed
+- Enhanced all installation functions with dry-run support
+- Improved logging with color-coded messages
+- Better resume logic with step ordering
+- Conditional Docker installation based on flags
+- Selective GUI application installation
+- More informative completion messages
+
+### Fixed
+- Installation recovery after network failures
+- Better handling of already-installed packages
+- Improved error context for debugging
+
 ## [Unreleased]
 
 ### Planned
@@ -73,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More theme choices
 - Auto-update mechanism
 - Scheduled backups
+- Installation time estimation
 
 ---
 
