@@ -59,6 +59,20 @@ target/
 *.img
 archiso/
 
+# Backup files and archives
+*.tar.gz
+*.tar.bz2
+*.zip
+*-backup-*.tar.gz
+jarch-backup-*.tar.gz
+.jarch-backups/
+.janus-backups/
+janus-backup/
+
+# Prevent nested repositories
+jArch/
+Janus-Arch-Linux/
+
 # SSH keys and secrets
 *.pem
 *.key
