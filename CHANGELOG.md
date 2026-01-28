@@ -123,11 +123,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Update Script**: New `update.sh` for system maintenance
+  - Updates system and AUR packages
+  - Syncs dotfiles from repository
+  - Checks for jArch version updates
+  - Optional backup before updating
+  - Dry-run mode for preview
+  - Package cache cleaning
+
 ### Planned
 - ISO build automation
 - Additional window manager options
 - More theme choices
-- Auto-update mechanism
+- Configuration wizard
+- Package groups
 - Scheduled backups
 - Installation time estimation
 

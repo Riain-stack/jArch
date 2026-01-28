@@ -47,6 +47,7 @@ sudo ./install/install.sh --dry-run
 
 - [Features](#features)
 - [Backup & Restore](#backup--restore)
+- [Keeping Your System Updated](#keeping-your-system-updated)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Screenshots](#screenshots)
@@ -145,6 +146,46 @@ jArch includes built-in backup and restore scripts for configuration management.
 - 📁 Backups saved to `~/.jarch-backups/restore_backup_TIMESTAMP/`
 - ✅ Confirmation prompts before changes
 - 📊 Compressed archives for easy distribution
+
+## 🔄 Keeping Your System Updated
+
+jArch includes an update script to keep your system current.
+
+### Update System Packages
+
+```bash
+# Full update (system + AUR packages)
+sudo ./update.sh
+
+# Update and sync dotfiles from repository
+sudo ./update.sh --sync-dotfiles
+
+# Create backup before updating
+sudo ./update.sh --backup
+
+# Preview what would be updated (dry-run)
+./update.sh --dry-run
+```
+
+### Update Options
+
+```bash
+# Only update system packages
+sudo ./update.sh --no-aur
+
+# Only update AUR packages
+sudo ./update.sh --no-system
+
+# Skip jArch version check
+sudo ./update.sh --no-check
+```
+
+**Features:**
+- 🔄 Updates system and AUR packages
+- 📥 Syncs dotfiles from repository
+- 🔍 Checks for jArch updates
+- 💾 Optional backup before updating
+- 🧹 Cleans package cache
 
 ## Requirements
 
