@@ -26,14 +26,13 @@ Complete Arch-based distro for coding featuring SDDM, Niri Wayland compositor, Z
 git clone https://github.com/Riain-stack/jArch.git
 cd jArch
 
-# Preview installation (dry-run)
+# Install jArch (choose your profile)
+sudo ./install/install.sh                    # Full installation (default)
+sudo ./install/install.sh --profile minimal  # Minimal installation (~2GB)
+sudo ./install/install.sh --profile standard # Standard installation (~4GB)
+
+# Preview before installing
 sudo ./install/install.sh --dry-run
-
-# Install jArch
-sudo ./install/install.sh
-
-# Resume if interrupted
-sudo ./install/install.sh --resume
 
 # Backup your configuration
 ./backup.sh --full
@@ -41,6 +40,8 @@ sudo ./install/install.sh --resume
 # Restore when needed
 ./restore.sh --full
 ```
+
+> **📖 For detailed installation options and profiles, see [INSTALL.md](INSTALL.md)**
 
 ## Table of Contents
 
@@ -60,15 +61,6 @@ sudo ./install/install.sh --resume
 - [License](#license)
 
 ## Features
-
-### Installer Features
-- ⚡ **Progress tracking** - Real-time percentage completion
-- 🔄 **Resume capability** - Continue from where installation failed
-- 🔍 **Dry-run mode** - Preview installation without changes
-- 🎯 **Selective installation** - Skip components you don't need
-- 📋 **Detailed logging** - Full installation logs for troubleshooting
-- 💡 **Smart error messages** - Actionable suggestions when things fail
-- ✅ **Pre-flight checks** - Verify system requirements before starting
 
 ### Core Components
 | Component | Tool | Details |
@@ -174,37 +166,36 @@ sudo ./install/install.sh
 
 ### Installation Options
 
-```bash
-# Standard installation
-sudo ./install/install.sh
+The installer now supports multiple profiles and options:
 
-# Preview without making changes
+```bash
+# Preview installation (dry-run)
 sudo ./install/install.sh --dry-run
 
-# Resume interrupted installation
-sudo ./install/install.sh --resume
+# Minimal installation (~2GB)
+sudo ./install/install.sh --profile minimal
 
-# Skip specific components
-sudo ./install/install.sh --skip-aur --skip-docker
+# Standard installation (~4GB)
+sudo ./install/install.sh --profile standard
 
-# Verbose output
-sudo ./install/install.sh --verbose
+# Full installation (~6GB, default)
+sudo ./install/install.sh --profile full
 
-# Get help
-sudo ./install/install.sh --help
+# Skip already installed packages
+sudo ./install/install.sh --skip-installed
+
+# Show all options
+./install/install.sh --help
 ```
 
-**Available flags:**
-- `--dry-run` - Preview installation without making changes
-- `--resume` - Resume from previous interrupted installation
-- `--skip-aur` - Skip AUR helper and AUR packages
-- `--skip-docker` - Skip Docker installation
-- `--skip-fonts` - Skip fonts installation
-- `--skip-gui` - Skip GUI applications (Firefox, Discord, etc.)
-- `--verbose` - Show detailed output from package installations
-- `-h, --help` - Display help message
+**Installation Profiles:**
+- **minimal**: Core system + Niri + basic tools (~2GB)
+- **standard**: Minimal + dev tools + common apps (~4GB)
+- **full**: Everything including Rust, Go, Java, and all extras (~6GB)
 
-Installation logs are saved to `/var/log/arch-coding-install-<timestamp>.log`
+> **📖 See [INSTALL.md](INSTALL.md) for complete installation guide**
+
+Installation log saved to `/var/log/arch-coding-install-<timestamp>.log`
 
 ### What Gets Installed
 
