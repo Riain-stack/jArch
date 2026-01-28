@@ -101,6 +101,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Better handling of already-installed packages
 - Improved error context for debugging
 
+## [1.2.2] - 2026-01-28
+
+### Fixed
+- Improved error handling in `fail_msg()` to prevent log write failures
+- Added proper variable quoting for `$SUDO_USER` throughout installer (security improvement)
+- Enhanced `install_aur_helper()` with better directory tracking and error handling
+- Fixed step counting accuracy for progress tracking (7/12/13 steps for profiles)
+- Updated test suite to match corrected installer behavior
+
+### Changed
+- Added documentation comments to `calculate_steps()` function
+- Improved test output clarity in step counting tests
+- Removed obsolete functions from test sequence for accuracy
+
+### Tests
+- All 61 tests passing (100% success rate)
+- Step counting verification: 3/3 profiles PASSED
+- Profile logic tests: 43/43 PASSED
+- Component mapping: PASSED
+
 ## [Unreleased]
 
 ### Planned
