@@ -132,6 +132,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dry-run mode for preview
   - Package cache cleaning
 
+- **Enhanced Neovim Configuration**: Significantly improved development experience
+  - Added Telescope fuzzy finder for files and grep
+  - Added Harpoon for quick file navigation
+  - Added which-key for keybinding discovery
+  - Added bufferline for buffer management
+  - Added indent guides and todo-comments
+  - Enhanced LSP keybindings with descriptions
+  - Better window and buffer navigation
+  - Git integration improvements
+  - Comprehensive keybinding system
+  - Auto-format on save for multiple languages
+  - Added NEOVIM_GUIDE.md with complete documentation
+
 ### Planned
 - ISO build automation
 - Additional window manager options
