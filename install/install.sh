@@ -17,6 +17,12 @@ PARALLEL_JOBS=4
 TOTAL_STEPS=0
 CURRENT_STEP=0
 
+# Time estimation variables
+START_TIME=0
+STEP_START_TIME=0
+ESTIMATED_TOTAL_TIME=0
+declare -A STEP_TIMES
+
 log() { 
     local msg="${GREEN}[INFO]${NC} $1"
     echo -e "$msg"
@@ -43,14 +49,46 @@ error() {
 progress() { 
     CURRENT_STEP=$((CURRENT_STEP + 1))
     local percent=$((CURRENT_STEP * 100 / TOTAL_STEPS))
-    local msg="${BLUE}[${percent}%]${NC} $1..."
+    
+    # Calculate estimated time remaining
+    local elapsed=$(($(date +%s) - START_TIME))
+    local time_info=""
+    
+    if [[ $CURRENT_STEP -gt 1 ]] && [[ $elapsed -gt 0 ]]; then
+        # Use actual elapsed time to calculate more accurate estimate
+        local avg_time_per_step=$((elapsed / (CURRENT_STEP - 1)))
+        local remaining_steps=$((TOTAL_STEPS - CURRENT_STEP + 1))
+        local estimated_remaining=$((avg_time_per_step * remaining_steps))
+        time_info=" | ETA: $(format_time $estimated_remaining)"
+    elif [[ $ESTIMATED_TOTAL_TIME -gt 0 ]]; then
+        # Use initial estimate if we don't have enough data yet
+        local steps_remaining=$((TOTAL_STEPS - CURRENT_STEP + 1))
+        local time_per_step=$((ESTIMATED_TOTAL_TIME / TOTAL_STEPS))
+        local estimated_remaining=$((time_per_step * steps_remaining))
+        time_info=" | ETA: $(format_time $estimated_remaining)"
+    fi
+    
+    local msg="${BLUE}[${percent}%]${NC} $1...${time_info}"
     echo -ne "\r$msg"
     if [[ -w "$LOG_FILE" ]] 2>/dev/null && [[ "$DRY_RUN" == false ]]; then
         echo "$msg" >> "$LOG_FILE" 2>/dev/null
     fi
+    
+    start_step_timer
 }
-done_msg() { 
-    local msg="${GREEN}[DONE]${NC}    $1... OK"
+done_msg() {
+    local step_name=$2
+    local elapsed_info=""
+    
+    # Calculate elapsed time for this step if available
+    if [[ -n "$step_name" ]] && [[ $STEP_START_TIME -gt 0 ]]; then
+        local step_end=$(date +%s)
+        local step_elapsed=$((step_end - STEP_START_TIME))
+        STEP_TIMES[$step_name]=$step_elapsed
+        elapsed_info=" ($(format_time $step_elapsed))"
+    fi
+    
+    local msg="${GREEN}[DONE]${NC}    $1... OK${elapsed_info}"
     echo -e "\r$msg"
     if [[ -w "$LOG_FILE" ]] 2>/dev/null && [[ "$DRY_RUN" == false ]]; then
         echo "$msg" >> "$LOG_FILE" 2>/dev/null
@@ -63,6 +101,82 @@ fail_msg() {
     if [[ -w "$LOG_FILE" ]] 2>/dev/null; then
         echo "$msg" >> "$LOG_FILE" 2>/dev/null
     fi
+}
+
+format_time() {
+    local total_seconds=$1
+    local hours=$((total_seconds / 3600))
+    local minutes=$(((total_seconds % 3600) / 60))
+    local seconds=$((total_seconds % 60))
+    
+    if [[ $hours -gt 0 ]]; then
+        printf "%dh %dm %ds" $hours $minutes $seconds
+    elif [[ $minutes -gt 0 ]]; then
+        printf "%dm %ds" $minutes $seconds
+    else
+        printf "%ds" $seconds
+    fi
+}
+
+get_estimated_step_time() {
+    local step_name=$1
+    
+    # Base time estimates in seconds (for sequential installation)
+    # These are conservative estimates based on average hardware and network
+    case "$step_name" in
+        "base")           echo 180 ;;  # 3 min
+        "display")        echo 240 ;;  # 4 min
+        "sddm")           echo 30 ;;   # 30 sec
+        "niri")           echo 60 ;;   # 1 min
+        "shell")          echo 90 ;;   # 1.5 min
+        "dev_tools")      echo 300 ;;  # 5 min
+        "neovim")         echo 120 ;;  # 2 min
+        "aur_helper")     echo 180 ;;  # 3 min
+        "aur_packages")   echo 240 ;;  # 4 min
+        "fonts")          echo 60 ;;   # 1 min
+        "additional")     echo 420 ;;  # 7 min (full profile only)
+        "wayland")        echo 90 ;;   # 1.5 min
+        "security")       echo 120 ;;  # 2 min
+        "sound")          echo 60 ;;   # 1 min
+        *)                echo 60 ;;   # default 1 min
+    esac
+}
+
+calculate_total_estimated_time() {
+    local total=0
+    
+    case "$INSTALL_PROFILE" in
+        minimal)
+            # base, display, niri, shell, neovim, fonts, wayland
+            total=$((180 + 240 + 60 + 90 + 120 + 60 + 90))
+            ;;
+        standard)
+            # minimal + dev_tools, paru, aur_packages, security, sound
+            total=$((180 + 240 + 60 + 90 + 300 + 120 + 180 + 240 + 60 + 90 + 120 + 60))
+            ;;
+        full)
+            # standard + additional_tools
+            total=$((180 + 240 + 60 + 90 + 300 + 120 + 180 + 240 + 60 + 420 + 90 + 120 + 60))
+            ;;
+    esac
+    
+    # Adjust for parallel installation (30-50% faster)
+    if [[ "$PARALLEL_INSTALL" == true ]]; then
+        total=$((total * 60 / 100))  # 40% reduction
+    fi
+    
+    echo $total
+}
+
+start_step_timer() {
+    STEP_START_TIME=$(date +%s)
+}
+
+end_step_timer() {
+    local step_name=$1
+    local end_time=$(date +%s)
+    local elapsed=$((end_time - STEP_START_TIME))
+    STEP_TIMES[$step_name]=$elapsed
 }
 
 show_help() {
@@ -288,7 +402,7 @@ install_base() {
             error "Failed to install base packages after retries"
         fi
     fi
-    done_msg "Installing base packages"
+    done_msg "Installing base packages" "base"
 }
 
 install_display() {
@@ -311,7 +425,7 @@ install_display() {
     else
         retry_command "pacman -S --noconfirm --needed $display_pkgs > /dev/null 2>&1" || warn "Some display packages failed"
     fi
-    done_msg "Installing display server"
+    done_msg "Installing display server" "display"
 }
 
 install_sddm() {
@@ -346,7 +460,7 @@ install_niri() {
     fi
     
     retry_command "pacman -S --noconfirm --needed niri" || error "Failed to install Niri"
-    done_msg "Installing Niri"
+    done_msg "Installing Niri" "niri"
 }
 
 install_shell_tools() {
@@ -369,7 +483,7 @@ install_shell_tools() {
     else
         retry_command "pacman -S --noconfirm --needed $shell_pkgs > /dev/null 2>&1" || warn "Some shell tools failed"
     fi
-    done_msg "Installing shell tools"
+    done_msg "Installing shell tools" "shell"
 }
 
 install_dev_tools() {
@@ -402,7 +516,7 @@ install_dev_tools() {
         fi
     fi
 
-    done_msg "Installing development tools"
+    done_msg "Installing development tools" "dev_tools"
 }
 
 install_neovim() {
@@ -421,7 +535,7 @@ install_neovim() {
     if command -v nvim &> /dev/null; then
         su - "$SUDO_USER" -c "nvim --headless '+Lazy! sync' +qa" 2>/dev/null || true
     fi
-    done_msg "Installing Neovim"
+    done_msg "Installing Neovim" "neovim"
 }
 
 install_aur_helper() {
@@ -461,7 +575,7 @@ install_aur_helper() {
         
         cd "$original_dir" || true
         rm -rf /tmp/paru
-        done_msg "Installing paru"
+        done_msg "Installing paru" "aur_helper"
     else
         cd "$original_dir" || true
         error "Failed to clone paru"
@@ -484,7 +598,7 @@ install_aur_packages() {
     sudo -u "$SUDO_USER" paru -S --noconfirm \
         starship zsh-fast-syntax-highlighting zsh-autosuggestions zsh-vi-mode > /dev/null 2>&1 \
         || warn "AUR package installation failed"
-    done_msg "Installing AUR packages"
+    done_msg "Installing AUR packages" "aur_packages"
 }
 
 setup_dotfiles() {
@@ -627,7 +741,7 @@ install_fonts() {
     else
         retry_command "pacman -S --noconfirm --needed $font_pkgs > /dev/null 2>&1" || warn "Some fonts failed"
     fi
-    done_msg "Installing fonts"
+    done_msg "Installing fonts" "fonts"
 }
 
 install_additional_tools() {
@@ -650,7 +764,7 @@ install_additional_tools() {
     else
         retry_command "pacman -S --noconfirm --needed $extra_pkgs > /dev/null 2>&1" || warn "Some additional tools failed"
     fi
-    done_msg "Installing additional tools"
+    done_msg "Installing additional tools" "additional"
 }
 
 setup_docker() {
@@ -693,7 +807,7 @@ install_wayland_tools() {
     else
         retry_command "pacman -S --noconfirm --needed $wayland_pkgs > /dev/null 2>&1" || warn "Some Wayland tools failed"
     fi
-    done_msg "Installing Wayland tools"
+    done_msg "Installing Wayland tools" "wayland"
 }
 
 install_security_tools() {
@@ -716,7 +830,7 @@ install_security_tools() {
     else
         retry_command "pacman -S --noconfirm --needed $security_pkgs > /dev/null 2>&1" || warn "Some security tools failed"
     fi
-    done_msg "Installing security tools"
+    done_msg "Installing security tools" "security"
 }
 
 setup_firewall() {
@@ -755,7 +869,7 @@ install_sound() {
     else
         retry_command "pacman -S --noconfirm --needed $sound_pkgs > /dev/null 2>&1" || warn "Sound installation failed"
     fi
-    done_msg "Installing sound support"
+    done_msg "Installing sound support" "sound"
 }
 
 parse_args() {
@@ -845,6 +959,11 @@ main() {
         log "Auto-detected ${cpu_cores} CPU cores, using ${PARALLEL_JOBS} parallel jobs"
     fi
 
+    # Initialize timing
+    START_TIME=$(date +%s)
+    calculate_steps
+    ESTIMATED_TOTAL_TIME=$(calculate_total_estimated_time)
+
     log "=========================================="
     log "jArch - Arch Linux Coding Distro Installer"
     log "=========================================="
@@ -853,10 +972,9 @@ main() {
     [[ "$DRY_RUN" == true ]] && log "Mode: DRY-RUN (no changes will be made)"
     [[ "$SKIP_INSTALLED" == true ]] && log "Mode: Skip already installed packages"
     [[ "$PARALLEL_INSTALL" == true ]] && log "Mode: PARALLEL (${PARALLEL_JOBS} jobs)"
+    log "Estimated time: $(format_time $ESTIMATED_TOTAL_TIME)"
     log "=========================================="
     log ""
-
-    calculate_steps
 
     check_arch
     check_network
@@ -890,15 +1008,28 @@ main() {
     
     verify_installation
 
+    # Calculate total elapsed time
+    local end_time=$(date +%s)
+    local total_elapsed=$((end_time - START_TIME))
+
     log ""
     log "=========================================="
     if [[ "$DRY_RUN" == true ]]; then
         log "Dry-run complete! No changes were made."
         log "Run without --dry-run to perform actual installation."
         [[ "$PARALLEL_INSTALL" == true ]] && log "Note: Parallel mode will use ${PARALLEL_JOBS} jobs"
+        log "Estimated installation time: $(format_time $ESTIMATED_TOTAL_TIME)"
     else
         log "Installation complete!"
         [[ "$PARALLEL_INSTALL" == true ]] && log "Installation used parallel mode (${PARALLEL_JOBS} jobs)"
+        log "Total time: $(format_time $total_elapsed)"
+        log "Estimated time was: $(format_time $ESTIMATED_TOTAL_TIME)"
+        
+        # Show time saved if faster than estimate
+        if [[ $total_elapsed -lt $ESTIMATED_TOTAL_TIME ]]; then
+            local time_saved=$((ESTIMATED_TOTAL_TIME - total_elapsed))
+            log "Time saved: $(format_time $time_saved) ✓"
+        fi
     fi
     log "=========================================="
     log ""

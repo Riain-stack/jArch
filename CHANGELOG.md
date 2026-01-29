@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Installation Time Estimation**: Real-time progress tracking with ETA
+  - Shows estimated time remaining during installation
+  - Dynamic ETA calculation based on actual progress
+  - Profile-aware time estimates (minimal/standard/full)
+  - Parallel mode adjustments (40% faster estimates)
+  - Installation summary showing actual vs estimated time
+  - Time saved display when completing faster than expected
+  - Per-step elapsed time tracking in logs
 - **Parallel Installation Mode**: Significantly faster package installation
   - `--parallel` flag enables parallel installation (30-50% faster)
   - `-j, --jobs NUM` flag to control parallel job count
@@ -21,10 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Optimized package grouping for parallel downloads
 
 ### Changed
-- Updated README.md with parallel installation examples
+- Enhanced progress indicators with real-time ETA display
+- Updated README.md with parallel installation examples and time estimates
 - Enhanced INSTALL.md with performance options documentation
 - Improved help text with performance recommendations
 - Added installation time comparison table
+- Installation completion shows total time and time saved
 
 ## [1.1.0] - 2026-01-28
 

@@ -65,6 +65,7 @@ sudo ./install/install.sh --parallel -j 8
 - Automatic CPU core detection
 - Optimal for systems with 4+ cores
 - Works with all profiles
+- Real-time ETA display shows time remaining
 
 **Note:** Requires good internet connection for best results.
 
@@ -152,6 +153,30 @@ sudo ./install/install.sh
 | `-p`, `--profile PROFILE` | Choose installation profile (minimal/standard/full) |
 | `--parallel` | Enable parallel package installation (30-50% faster) |
 | `-j`, `--jobs NUM` | Number of parallel jobs (default: auto-detect, cap at 8) |
+
+## Installation Time Estimation
+
+The installer provides real-time progress tracking with estimated time remaining:
+
+**Features:**
+- Shows initial estimated installation time based on profile and parallel mode
+- Displays dynamic ETA (Estimated Time Remaining) during installation
+- Adjusts estimates based on actual progress
+- Shows per-step completion times in logs
+- Final summary displays:
+  - Total installation time
+  - Initial estimated time
+  - Time saved (if faster than expected)
+
+**Estimated Times by Profile:**
+
+| Profile | Sequential | Parallel (--parallel) |
+|---------|-----------|----------------------|
+| **Minimal** | ~14 minutes | ~8-10 minutes |
+| **Standard** | ~20 minutes | ~12-15 minutes |
+| **Full** | ~25 minutes | ~15-18 minutes |
+
+**Note:** Actual times vary based on internet speed, CPU cores, and system performance.
 
 ## Examples
 

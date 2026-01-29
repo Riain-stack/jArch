@@ -290,6 +290,8 @@ Installation log saved to `/var/log/arch-coding-install-<timestamp>.log`
 
 **Note**: Parallel installation (--parallel) can reduce installation time by 30-50% on systems with multiple CPU cores and fast internet connections.
 
+**Real-time Progress**: The installer displays estimated time remaining (ETA) during installation, dynamically adjusting based on actual progress. At completion, it shows total time taken and time saved compared to the initial estimate.
+
 ## Screenshots
 
 > **Note**: Screenshots will be added here showing:
